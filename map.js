@@ -19,7 +19,7 @@ SlippyMap.Map = (function() {
     },
 
     go: function(latitude, longitude, depth) {
-      this.depth = _.between(depth, this.service.min_zoom(), this.service.max_zoom());
+      this.depth = depth;
       this.latitude = normalize_latitude(latitude, this.depth);
       this.longitude = normalize_longitude(longitude, this.depth);
       this.refresh();

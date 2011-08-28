@@ -17,9 +17,7 @@ Mapnik = (function() {
       var key = constrain_parameters(x, y, z);
       return key ? key.x + '-' + key.y + '-' + key.z : '';
     },
-    tile_size: function() { return TILE_SIZE; },
-    min_zoom: function() { return MIN_ZOOM; },
-    max_zoom: function() { return MAX_ZOOM; }
+    tile_size: function() { return TILE_SIZE; }
   });
 
   function service_parameters(x, y, z) {
@@ -28,7 +26,7 @@ Mapnik = (function() {
   }
 
   function constrain_parameters(x, y, z) {
-    z = _.between(z, MIN_ZOOM, MAX_ZOOM);
+    z = Math.min(Math.max(z, MIN_ZOOM), MAX_ZOOM);
     var scale = Math.pow(2, z);
     if (y < 0 || y >= scale) return null;
     return { x: ((x % scale) + scale) % scale, y: y, z: z };

@@ -5,9 +5,6 @@ _.templateSettings = {
   
 _.mixin({
   noop: function(){},
-  between: function(value, min, max) {
-    return Math.min(Math.max(value, min), max);
-  },
   log: _.wrap(enyo.log, function(f) {
     f.apply(null, enyo.logging.expand_arguments_without_crawling(arguments));
   })
