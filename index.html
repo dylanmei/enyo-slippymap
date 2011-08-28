@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<head>
+	<title>Slippy</title>
+	<script type="text/javascript"
+          	src="file:///opt/PalmSDK/Current/share/refcode/framework/enyo/1.0/framework/enyo.js">
+	</script>
+	<style type="text/css">
+#app {
+	margin: 20px;
+}
+	</style>
+	<script type="text/javascript">
+
+(function() {
+	enyo.kind({
+		name: "App",
+		kind: "VFlexBox",
+		components: [
+			{ name: 'slippy', kind: 'SlippyMap' }
+		],
+    rendered: function() {
+      this.inherited(arguments);
+      var node = this.hasNode();
+      this.$.slippy
+        .pan(7.62, -122.36)
+        .zoom(1)
+        .size(node.offsetWidth, node.offsetHeight);
+    },
+	  resizeHandler: function() {
+      var node = this.hasNode();
+	  	this.$.slippy.size(node.offsetWidth, node.offsetHeight);
+	  }		
+	});
+})();
+
+	</script>
+</head>
+<body>
+<script type="text/javascript">
+
+  (function() {
+    new App().renderInto(document.body);
+  })();
+
+</script>
+</body>
+</html>
