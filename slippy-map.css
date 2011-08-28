@@ -1,5 +1,16 @@
 
 .slippy-map {
   background-color: #333;
+  overflow: hidden;
+  position: relative;
+}
+
+.slippy-map .slippy-surface {
+  position: absolute;
+  z-index: 2;
+}
+
+.slippy-map .slippy-tile {
+  position: absolute;
 }
 

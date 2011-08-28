@@ -8,7 +8,7 @@
     },
     rendered: function() {
       this.inherited(arguments);
-      this.map = new SlippyMap.Map(this.hasNode());
+      this.map = new SlippyMap.Map(this.hasNode(), new Mapnik());
     },
     pan: function(latitude, longitude) {
       if (this.map) this.map.pan(latitude, longitude);

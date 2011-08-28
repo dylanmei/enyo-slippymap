@@ -1,11 +1,11 @@
 SlippyMap.Map = (function() {
-  var MIN_ZOOM = 1, MAX_ZOOM = 16, MAX_NORTH = 85.05112877980662, TILE_SIZE = 256;
+  var MAX_NORTH = 85.05112877980662, TILE_SIZE = 256;
 
   function Map(element, tile_service) {
     this.element = element;
-    this.tile_service = tile_service;
+    this.service = tile_service;
     this.layers = [
-//      new SlippyMap.Surface(this, tile_service)
+      new SlippyMap.Surface(this, tile_service)
     ];
   }
 
@@ -19,7 +19,7 @@ SlippyMap.Map = (function() {
     },
 
     go: function(latitude, longitude, depth) {
-      this.depth = Math.min(Math.max(depth, MIN_ZOOM), MAX_ZOOM);
+      this.depth = _.between(depth, this.service.min_zoom(), this.service.max_zoom());
       this.latitude = normalize_latitude(latitude, this.depth);
       this.longitude = normalize_longitude(longitude, this.depth);
       this.refresh();
@@ -39,7 +39,7 @@ SlippyMap.Map = (function() {
     },
 
     position: function() {
-      return location_to_position(this.location());
+      return location_to_position(this.location(), this.depth);
     },
 
     refresh: function() {
@@ -63,10 +63,12 @@ SlippyMap.Map = (function() {
         x: pos.x, y: pos.y, z: this.depth,
         width: this.width,
         height: this.height,
-        span: Math.pow(2, this.depth) * TILE_SIZE,
-        location_to_position: location_to_position,
+        tile_size: TILE_SIZE,
+        tile_span: Math.pow(2, this.depth) * TILE_SIZE
+        //span: Math.pow(2, this.depth) * TILE_SIZE,
+        //location_to_position: location_to_position,
         //location_to_viewport: location_to_viewport,
-        position_to_location: position_to_location
+        //position_to_location: position_to_location
       };
 
       _.each(this.layers, function(layer) {
