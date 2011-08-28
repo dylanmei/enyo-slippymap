@@ -1,5 +1,5 @@
 SlippyMap.Map = (function() {
-  var MAX_NORTH = 85.05112877980662, TILE_SIZE = 256;
+  var MAX_NORTH = 85.05112877980662;
 
   function Map(element, tile_service) {
     this.element = element;
@@ -39,7 +39,11 @@ SlippyMap.Map = (function() {
     },
 
     position: function() {
-      return location_to_position(this.location(), this.depth);
+      return location_to_position(this.location(), this.span());
+    },
+
+    span: function() {
+      return Math.pow(2, this.depth) * this.service.tile_size();
     },
 
     refresh: function() {
@@ -58,17 +62,13 @@ SlippyMap.Map = (function() {
     draw: function() {
       var pos = this.position();
       var context = {
-        latitude: this.latitude,
-        longitude: this.longitude,
-        x: pos.x, y: pos.y, z: this.depth,
+        x: pos.x,
+        y: pos.y,
+        z: this.depth,
         width: this.width,
         height: this.height,
-        tile_size: TILE_SIZE,
-        tile_span: Math.pow(2, this.depth) * TILE_SIZE
-        //span: Math.pow(2, this.depth) * TILE_SIZE,
-        //location_to_position: location_to_position,
-        //location_to_viewport: location_to_viewport,
-        //position_to_location: position_to_location
+        latitude: this.latitude,
+        longitude: this.longitude
       };
 
       _.each(this.layers, function(layer) {
@@ -77,31 +77,29 @@ SlippyMap.Map = (function() {
     }    
   });
 
-  function location_to_position(location, zoom) {
+  function location_to_position(location, span) {
     var pair = _.isNumber(location),
         latitude = pair ? arguments[0] : location.latitude,
         longitude = pair ? arguments[1] : location.longitude,
-        z = pair ? arguments[2] : zoom;
+        span = pair ? arguments[2] : span;
 
-    var size = Math.pow(2, z) * TILE_SIZE;
-    var x = size / 2 + longitude * size / 360;
+    var x = span / 2 + longitude * span / 360;
     var s = Math.sin(Math.PI * latitude / 180);
     if (s == 1) s -= 1e-9;
     if (s == -1) s += 1e-9;
     var l = 0.5 * Math.log((1 + s) / (1 - s));
-    var y = size / 2 - l * (size / (2 * Math.PI));
+    var y = span / 2 - l * (span / (2 * Math.PI));
     return { x: x, y: y };
   }
 
-  function position_to_location(position, zoom) {
+  function position_to_location(position, span) {
     var pair = _.isNumber(position),
       x = pair ? arguments[0] : position.x,
       y = pair ? arguments[1] : position.y,
       z = pair ? arguments[2] : zoom;
 
-    var size = Math.pow(2, z) * TILE_SIZE;
-    var latitude = (2 * Math.atan(Math.exp((1 - 2 * y / size) * Math.PI)) - Math.PI / 2) * (180 / Math.PI);
-    var longitude = (x - size / 2) / (size / 360);
+    var latitude = (2 * Math.atan(Math.exp((1 - 2 * y / span) * Math.PI)) - Math.PI / 2) * (180 / Math.PI);
+    var longitude = (x - span / 2) / (span / 360);
 
     return {
       latitude: normalize_latitude(latitude),
