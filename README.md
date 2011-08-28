@@ -1,6 +1,6 @@
-# enyo-slippy
+# enyo-slippymap
 
-A slippy tiles widget for enyo-based WebOS applications.
+A slippy map tiles widget for enyo-based WebOS applications.
 
 ## License
 
