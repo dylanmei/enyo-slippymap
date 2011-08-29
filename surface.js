@@ -11,17 +11,16 @@ SlippyMap.Surface = (function() {
 
   _.extend(Surface.prototype, {
     draw: function(context) {
+      var offset_x = context.x - context.width / 2,
+          offset_y = context.y - context.height / 2,
+          tile_size = this.service.tile_size();
+      var grid = tile_grid(context.x, context.width,
+        context.y, context.height, tile_size);
 
-      var tile_size = this.service.tile_size(),
-          offset_x = context.x - context.width / 2, offset_y = context.y - context.height / 2,
-          extent_x = context.x + context.width / 2, extent_y = context.y + context.height / 2;
-
-      var last_row = Math.ceil(extent_y / tile_size) - 1;
-      var last_column = Math.ceil(extent_x / tile_size) - 1;
-      for (var row = Math.floor(offset_y / tile_size); row <= last_row; row++) {
+      for (var row = grid.row.first; row <= grid.row.last; row++) {
         var pixel_y = row * tile_size - offset_y;
 
-        for (var column = Math.floor(offset_x / tile_size); column <= last_column; column++) {
+        for (var column = grid.column.first; column <= grid.column.last; column++) {
           var pixel_x = column * tile_size - offset_x;
           this.draw_tile(column, row, pixel_x, pixel_y, context.z);
         }
@@ -32,13 +31,14 @@ SlippyMap.Surface = (function() {
       var key = this.service.tile_key(column, row, z);
       if (key != '') {
         var id = tile_identity(key, column, row, z);
-        if (document.getElementById(id)) {
-          //exists...
+        var tile = document.getElementById(id);
+        if (tile) {
+          tile.style.left = x + 'px';
+          tile.style.top = y + 'px';
         }
         else {
-          var tile = this.new_tile_layer(id, x, y);
-          var image = this.new_tile_image(column, row, z);
-          tile.appendChild(image);
+          tile = this.new_tile_layer(id, x, y);
+          tile.appendChild(this.new_tile_image(column, row, z));
           this.element.appendChild(tile);
         }
       }
@@ -72,6 +72,19 @@ SlippyMap.Surface = (function() {
       return image;
     }
   });
+
+  function tile_grid(x, width, y, height, tile_size) {
+    return {
+      row: {
+        first: Math.floor((y - height / 2) / tile_size),
+        last: Math.ceil((y + height / 2) / tile_size) - 1
+      },
+      column: {
+        first: Math.floor((x - width / 2) / tile_size),
+        last: Math.ceil((x + width / 2) / tile_size) - 1
+      }
+    };
+  }
 
   function tile_identity(key, column, row, zoom) {
     return 'slippy-' + key + '-(' + zoom + ',' + column + ',' + row + ')';
