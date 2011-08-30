@@ -64,7 +64,7 @@ SlippyMap.Map = (function() {
       var context = {
         x: pos.x,
         y: pos.y,
-        z: this.depth,
+        zoom: this.depth,
         width: this.width,
         height: this.height,
         latitude: this.latitude,

@@ -1,28 +1,39 @@
 SlippyMap.Surface = (function() {
 
   function Surface(map, tile_service) {
-    this.service = tile_service;
     this.component = enyo.create({
       nodeTag: 'div',
       className: 'slippy-surface',
     }).renderInto(map.element);
     this.element = this.component.hasNode();
+    this.service = tile_service;
+    this.clear();
   }
 
   _.extend(Surface.prototype, {
+    clear: function() {
+      this.element.innerHTML = '';
+      this.layout = new Layout(this.service.tile_size());
+    },
+
     draw: function(context) {
-      var offset_x = context.x - context.width / 2,
-          offset_y = context.y - context.height / 2,
-          tile_size = this.service.tile_size();
-      var grid = tile_grid(context.x, context.width,
-        context.y, context.height, tile_size);
+      this.layout.apply(context);
+      
+      var offset = this.layout.offset();
+      this.element.style.webkitTransform = 'translate3d(' +
+        Math.round(offset.x) + 'px,' +
+        Math.round(offset.y) + 'px,0)';
 
-      for (var row = grid.row.first; row <= grid.row.last; row++) {
-        var pixel_y = row * tile_size - offset_y;
+      var rows = this.layout.rows(),
+          cols = this.layout.cols(),
+          unit = this.layout.unit;
 
-        for (var column = grid.column.first; column <= grid.column.last; column++) {
-          var pixel_x = column * tile_size - offset_x;
-          this.draw_tile(column, row, pixel_x, pixel_y, context.z);
+      for (var row = rows.first; row <= rows.last; row++) {
+        var y = row * unit;
+
+        for (var col = cols.first; col <= cols.last; col++) {
+          var x = col * unit;
+          this.draw_tile(col, row, x, y, context.zoom);
         }
       }
     },
@@ -73,22 +84,47 @@ SlippyMap.Surface = (function() {
     }
   });
 
-  function tile_grid(x, width, y, height, tile_size) {
-    return {
-      row: {
-        first: Math.floor((y - height / 2) / tile_size),
-        last: Math.ceil((y + height / 2) / tile_size) - 1
-      },
-      column: {
-        first: Math.floor((x - width / 2) / tile_size),
-        last: Math.ceil((x + width / 2) / tile_size) - 1
-      }
-    };
-  }
-
   function tile_identity(key, column, row, zoom) {
     return 'slippy-' + key + '-(' + zoom + ',' + column + ',' + row + ')';
   }
+
+  function Layout(tile_size) {
+    this.unit = tile_size;
+  }
+
+  _.extend(Layout.prototype, {
+    apply: function(context) {
+      this.zoom = context.zoom;
+      this.logical_x = context.x;
+      this.logical_y = context.y;
+      this.logical_width = Math.pow(2, this.zoom) * this.unit;
+      this.logical_height = Math.pow(2, this.zoom) * this.unit;
+      this.viewport_width = context.width;
+      this.viewport_height = context.height;
+    },
+    offset: function() {
+      return {
+        x: (this.viewport_width / 2) - this.logical_x,
+        y: (this.viewport_height / 2) - this.logical_y
+      };
+    },
+    rows: function() {
+      var offset_y = this.logical_y - this.viewport_height / 2,
+          extent_y = this.logical_y + this.viewport_height / 2;
+      return {
+        first: Math.floor(offset_y / this.unit),
+        last: Math.ceil(extent_y / this.unit) - 1
+      }
+    },
+    cols: function() {
+      var offset_x = this.logical_x - this.viewport_width / 2,
+          extent_x = this.logical_x + this.viewport_width / 2;
+      return {
+        first: Math.floor(offset_x / this.unit),
+        last: Math.ceil(extent_x / this.unit) - 1
+      }
+    }
+  });
 
   return Surface;
 })();
