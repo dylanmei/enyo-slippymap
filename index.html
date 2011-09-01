@@ -9,27 +9,51 @@
 #app {
 	margin: 20px;
 }
+#app .controls {
+	position: absolute;
+	top: 20px;
+	left: 20px;
+	z-index: 3;
+  padding: 10px;
+  width: 120px;
+  background-color: rgba(255, 255, 255, 0.33);
+  border-radius: 8px;
+}
 	</style>
 	<script type="text/javascript">
 
 (function() {
-	enyo.kind({
-		name: "App",
-		kind: "VFlexBox",
-		components: [
-			{ name: 'slippy', kind: 'SlippyMap' }
-		],
+  enyo.kind({
+    name: "App",
+    kind: "VFlexBox",
+    components: [
+      { name: 'slippy', kind: 'SlippyMap' },
+      { className: 'controls', components: [
+        { name: 'latitude', kind: 'enyo.Input', hint: 'Lat', onchange: 'locationHandler' },
+        { name: 'longitude', kind: 'enyo.Input', hint: 'Lng', onchange: 'locationHandler' }
+      ]}
+    ],
     rendered: function() {
       this.inherited(arguments);
-      var node = this.hasNode();
+      var node = this.hasNode(),
+          latitude = 47.6,
+          longitude = -122.33;
+      this.$.latitude.setValue(latitude);
+      this.$.longitude.setValue(longitude);
       this.$.slippy
         .zoom(2)
-        .pan(47.6, -122.33)
+        .pan(latitude, longitude)
         .size(node.offsetWidth, node.offsetHeight);
     },
-	  resizeHandler: function() {
+    locationHandler: function() {
+    	this.$.slippy.pan(
+        parseFloat(this.$.latitude.getValue()),
+        parseFloat(this.$.longitude.getValue())
+    	);
+    },
+    resizeHandler: function() {
       var node = this.hasNode();
-	  	this.$.slippy.size(node.offsetWidth, node.offsetHeight);
+      this.$.slippy.size(node.offsetWidth, node.offsetHeight);
 	  }		
 	});
 })();
