@@ -25,6 +25,10 @@
         this.applyStyle('height', height + 'px');
       }
       return this;
+    },
+    mark: function(latitude, longitude) {
+      if (this.map) this.map.mark(latitude, longitude);
+      return this;
     }
   };
 

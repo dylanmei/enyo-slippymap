@@ -13,7 +13,7 @@
 	position: absolute;
 	top: 20px;
 	left: 20px;
-	z-index: 3;
+	z-index: 300;
   padding: 10px;
   width: 120px;
   background-color: rgba(255, 255, 255, 0.33);
@@ -27,7 +27,7 @@
     name: "App",
     kind: "VFlexBox",
     components: [
-      { name: 'slippy', kind: 'SlippyMap' },
+      { name: 'map', kind: 'SlippyMap' },
       { className: 'controls', components: [
         { name: 'latitude', kind: 'enyo.Input', hint: 'Lat', onchange: 'locationHandler' },
         { name: 'longitude', kind: 'enyo.Input', hint: 'Lng', onchange: 'locationHandler' }
@@ -36,24 +36,30 @@
     rendered: function() {
       this.inherited(arguments);
       var node = this.hasNode(),
-          latitude = 47.6,
-          longitude = -122.33;
+          latitude = 0,
+          longitude = 0;
       this.$.latitude.setValue(latitude);
       this.$.longitude.setValue(longitude);
-      this.$.slippy
+      this.$.map
         .zoom(2)
         .pan(latitude, longitude)
         .size(node.offsetWidth, node.offsetHeight);
+      
+      this.$.map
+        .mark(0, 0)
+        .mark(-43.53, 172.62)
+        .mark(26.926, 75.8235)
+        .mark(47.6, -122.33);
     },
     locationHandler: function() {
-    	this.$.slippy.pan(
+    	this.$.map.pan(
         parseFloat(this.$.latitude.getValue()),
         parseFloat(this.$.longitude.getValue())
     	);
     },
     resizeHandler: function() {
       var node = this.hasNode();
-      this.$.slippy.size(node.offsetWidth, node.offsetHeight);
+      this.$.map.size(node.offsetWidth, node.offsetHeight);
 	  }		
 	});
 })();

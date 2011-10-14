@@ -5,7 +5,8 @@ SlippyMap.Map = (function() {
     this.element = element;
     this.service = tile_service;
     this.layers = [
-      new SlippyMap.Surface(this, tile_service)
+      this.surface = new SlippyMap.Surface(this, tile_service),
+      this.markers = new SlippyMap.Markers(this)
     ];
   }
 
@@ -31,6 +32,11 @@ SlippyMap.Map = (function() {
           height = pair ? arguments[1] : size.height;
       this.element.style.width = (this.width = width) + 'px';
       this.element.style.height = (this.height = height) + 'px';
+      this.refresh();
+    },
+
+    mark: function(latitude, longitude) {
+      this.markers.mark(latitude, longitude);
       this.refresh();
     },
 
@@ -61,14 +67,28 @@ SlippyMap.Map = (function() {
 
     draw: function() {
       var pos = this.position();
+      var span = this.span();
       var context = {
         x: pos.x,
         y: pos.y,
+        span: span,
         zoom: this.depth,
         width: this.width,
         height: this.height,
         latitude: this.latitude,
-        longitude: this.longitude
+        longitude: this.longitude,
+
+        location_to_position: function(location) {
+          var args = [].splice.call(arguments, 0);
+          args.push(span);
+          return location_to_position.apply(null, args);
+        },
+
+        position_to_location: function(position) {
+          var args = [].splice.call(arguments, 0);
+          args.push(span);
+          return position_to_location.apply(null, args);
+        }
       };
 
       _.each(this.layers, function(layer) {

@@ -7,10 +7,25 @@
 
 .slippy-map .slippy-surface {
   position: absolute;
-  z-index: 2;
+  z-index: 1;
 }
 
-.slippy-map .slippy-tile {
+.slippy-surface .tile {
   position: absolute;
 }
 
+.slippy-map .slippy-markers {
+  position: absolute;
+  z-index: 10;  
+}
+
+.slippy-markers .marker {
+  width: 8px;
+  height: 8px;
+  left: 3.5px;
+  top: 3.5px;
+  background-color: red;
+  border: 1px solid #660000;
+  position: absolute;
+  -webkit-transform:rotate(45deg);
+}

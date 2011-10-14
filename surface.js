@@ -1,32 +1,25 @@
 SlippyMap.Surface = (function() {
 
   function Surface(map, tile_service) {
-    this.component = enyo.create({
-      nodeTag: 'div',
-      className: 'slippy-surface',
-    }).renderInto(map.element);
-    this.element = this.component.hasNode();
+    this.element = document.createElement('div');
+    this.element.className = 'slippy-surface';
+    map.element.appendChild(this.element);
     this.service = tile_service;
-    this.clear();
   }
 
   _.extend(Surface.prototype, {
     clear: function() {
       this.element.innerHTML = '';
-      this.layout = new Layout(this.service.tile_size());
     },
 
     draw: function(context) {
-      this.layout.apply(context);
-      
-      var offset = this.layout.offset();
       this.element.style.webkitTransform = 'translate3d(' +
-        Math.round(offset.x) + 'px,' +
-        Math.round(offset.y) + 'px,0)';
+        Math.round((context.width / 2) - context.x) + 'px,' +
+        Math.round((context.height / 2) - context.y) + 'px,0)';
 
-      var rows = this.layout.rows(),
-          cols = this.layout.cols(),
-          unit = this.layout.unit;
+      var unit = context.span / Math.pow(2, context.zoom),
+          cols = tile_column_range(context, unit),
+          rows = tile_rowset_range(context, unit);
 
       for (var row = rows.first; row <= rows.last; row++) {
         var y = row * unit;
@@ -59,7 +52,7 @@ SlippyMap.Surface = (function() {
       var size = this.service.tile_size();
       var tile = document.createElement('div');
       tile.id = id;
-      tile.className = 'slippy-tile';
+      tile.className = 'tile';
       tile.style.width = size + 'px';
       tile.style.height = size + 'px';
       tile.style.left = x + 'px';
@@ -88,43 +81,23 @@ SlippyMap.Surface = (function() {
     return 'slippy-' + key + '-(' + zoom + ',' + column + ',' + row + ')';
   }
 
-  function Layout(tile_size) {
-    this.unit = tile_size;
+  function tile_rowset_range(context, unit) {
+    var offset_y = context.y - context.height / 2,
+        extent_y = context.y + context.height / 2;
+    return {
+      first: Math.floor(offset_y / unit),
+      last: Math.ceil(extent_y / unit) - 1
+    }
   }
 
-  _.extend(Layout.prototype, {
-    apply: function(context) {
-      this.zoom = context.zoom;
-      this.logical_x = context.x;
-      this.logical_y = context.y;
-      this.logical_width = Math.pow(2, this.zoom) * this.unit;
-      this.logical_height = Math.pow(2, this.zoom) * this.unit;
-      this.viewport_width = context.width;
-      this.viewport_height = context.height;
-    },
-    offset: function() {
-      return {
-        x: (this.viewport_width / 2) - this.logical_x,
-        y: (this.viewport_height / 2) - this.logical_y
-      };
-    },
-    rows: function() {
-      var offset_y = this.logical_y - this.viewport_height / 2,
-          extent_y = this.logical_y + this.viewport_height / 2;
-      return {
-        first: Math.floor(offset_y / this.unit),
-        last: Math.ceil(extent_y / this.unit) - 1
-      }
-    },
-    cols: function() {
-      var offset_x = this.logical_x - this.viewport_width / 2,
-          extent_x = this.logical_x + this.viewport_width / 2;
-      return {
-        first: Math.floor(offset_x / this.unit),
-        last: Math.ceil(extent_x / this.unit) - 1
-      }
+  function tile_column_range(context, unit) {
+    var offset_x = context.x - context.width / 2,
+        extent_x = context.x + context.width / 2;
+    return {
+      first: Math.floor(offset_x / unit),
+      last: Math.ceil(extent_x / unit) - 1
     }
-  });
+  }
 
   return Surface;
 })();
