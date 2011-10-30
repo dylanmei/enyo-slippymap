@@ -5,5 +5,6 @@ enyo.depends(
   'map.js',
   'mapnik.js',
   'surface.js',
-  'markers.js'
+  'markers.js',
+  'overlay.js'
 );

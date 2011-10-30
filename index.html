@@ -3,7 +3,7 @@
 <head>
 	<title>Slippy</title>
 	<script type="text/javascript"
-          	src="file:///opt/PalmSDK/Current/share/refcode/framework/enyo/1.0/framework/enyo.js">
+          	src="file:///opt/PalmSDK/Current/share/framework/enyo/1.0/framework/enyo.js">
 	</script>
 	<style type="text/css">
 #app {
@@ -50,6 +50,10 @@
         .mark(-43.53, 172.62)
         .mark(26.926, 75.8235)
         .mark(47.6, -122.33);
+      
+      var now = new Date();
+      now.setHours(now.getHours()+7);
+      this.$.map.time(now, -9);
     },
     locationHandler: function() {
     	this.$.map.pan(

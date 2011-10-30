@@ -14,6 +14,15 @@
   position: absolute;
 }
 
+.slippy-map .slippy-overlay {
+  position: absolute;
+  z-index: 2;
+}
+
+.slippy-overlay .overlay {
+  position: absolute;
+}
+
 .slippy-map .slippy-markers {
   position: absolute;
   z-index: 10;  
@@ -29,3 +38,4 @@
   position: absolute;
   -webkit-transform:rotate(45deg);
 }
+

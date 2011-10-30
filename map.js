@@ -6,6 +6,7 @@ SlippyMap.Map = (function() {
     this.service = tile_service;
     this.layers = [
       this.surface = new SlippyMap.Surface(this, tile_service),
+      this.overlay = new SlippyMap.Overlay(this),
       this.markers = new SlippyMap.Markers(this)
     ];
   }
@@ -77,6 +78,8 @@ SlippyMap.Map = (function() {
         height: this.height,
         latitude: this.latitude,
         longitude: this.longitude,
+        declination: this.declination,
+        hour_angle: this.hour_angle,
 
         location_to_position: function(location) {
           var args = [].splice.call(arguments, 0);
