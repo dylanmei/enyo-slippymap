@@ -15,10 +15,14 @@ SlippyMap.Map = (function() {
   _.extend(Map.prototype, {
     pan: function(latitude, longitude) {
       this.go(latitude, longitude, this.depth);
+      _.trigger('map:pan', {
+        latitude: latitude, longitude: longitude
+      });
     },
 
     zoom: function(depth) {
       this.go(this.latitude, this.longitude, depth);
+      _.trigger('map:zoom', { zoom: depth });
     },
 
     go: function(latitude, longitude, depth) {

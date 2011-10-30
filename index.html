@@ -33,13 +33,16 @@
         { name: 'longitude', kind: 'enyo.Input', hint: 'Lng', onchange: 'locationHandler' }
       ]}
     ],
+    create: function() {
+      this.inherited(arguments);
+      _.observe('map:pan',
+        _.bind(this.panHandler, this));
+    },
     rendered: function() {
       this.inherited(arguments);
       var node = this.hasNode(),
           latitude = 0,
           longitude = 0;
-      this.$.latitude.setValue(latitude);
-      this.$.longitude.setValue(longitude);
       this.$.map
         .zoom(2)
         .pan(latitude, longitude)
@@ -50,6 +53,10 @@
         .mark(-43.53, 172.62)
         .mark(26.926, 75.8235)
         .mark(47.6, -122.33);
+    },
+    panHandler: function(e) {
+      this.$.latitude.setValue(e.latitude.toFixed(4));
+      this.$.longitude.setValue(e.longitude.toFixed(4));
     },
     locationHandler: function() {
     	this.$.map.pan(

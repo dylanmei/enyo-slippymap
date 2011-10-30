@@ -5,6 +5,15 @@ _.templateSettings = {
   
 _.mixin({
   noop: function(){},
+  observe: function(type, handler) {
+    addEventListener(type, handler, false);    
+  },
+
+  trigger: function(type, params) {
+    var event = document.createEvent('Event');
+    event.initEvent(type, true, false);
+    return dispatchEvent(_.extend(event, params));    
+  },  
   log: _.wrap(enyo.log, function(f) {
     f.apply(null, enyo.logging.expand_arguments_without_crawling(arguments));
   })
