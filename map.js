@@ -9,6 +9,7 @@ SlippyMap.Map = (function() {
       this.overlay = new SlippyMap.Overlay(this),
       this.markers = new SlippyMap.Markers(this)
     ];
+    new EventHandler(this);
   }
 
   _.extend(Map.prototype, {
@@ -78,8 +79,6 @@ SlippyMap.Map = (function() {
         height: this.height,
         latitude: this.latitude,
         longitude: this.longitude,
-        declination: this.declination,
-        hour_angle: this.hour_angle,
 
         location_to_position: function(location) {
           var args = [].splice.call(arguments, 0);
@@ -119,7 +118,7 @@ SlippyMap.Map = (function() {
     var pair = _.isNumber(position),
       x = pair ? arguments[0] : position.x,
       y = pair ? arguments[1] : position.y,
-      z = pair ? arguments[2] : zoom;
+      z = pair ? arguments[2] : span;
 
     var latitude = (2 * Math.atan(Math.exp((1 - 2 * y / span) * Math.PI)) - Math.PI / 2) * (180 / Math.PI);
     var longitude = (x - span / 2) / (span / 360);
@@ -137,6 +136,106 @@ SlippyMap.Map = (function() {
   function normalize_longitude(longitude) {
     return (longitude + 180) % 360 + (longitude < -180 ? 180 : -180);
   }
+
+  var EventHandler = function(map) {
+    this.map = map;
+    this.element = map.element;
+    this.tap_timer = null;
+    map.element.addEventListener('mousedown', _.bind(this.press, this), false);
+    map.element.addEventListener('mouseup', _.bind(this.release, this), false);
+    map.element.addEventListener('mouseout', _.bind(this.release, this), false);
+    map.element.addEventListener('mousemove', _.bind(this.move, this), false);
+  };
+
+  _.extend(EventHandler.prototype, {
+    interactive: function() {
+      return !_.isUndefined(this.map.ready) && this.map.ready;
+    },
+    press: function(e) {
+      if (!this.interactive()) return;
+
+      var p = this.position_from_event(e);
+      this.last_x = p.x;
+      this.last_y = p.y;
+      this.pressed = _.isUndefined(e.button) || e.button == 0;
+      if (this.pressed) this.prevent_default(e);
+    },
+    release: function(e) {
+      if (!this.interactive()) return;
+
+      if (e.type == 'mouseout' && this.is_map_element(e.toElement))
+        return;
+
+      if (!this.dragging && this.pressed) {
+        if (!this.tap_timer) {
+          this.tap_timer = window.setTimeout(_.bind(function(e) {
+            this.tap(e); this.tap_timer = null;
+          }, this, e), 360);
+        }
+        else {
+          window.clearTimeout(this.tap_timer);
+          this.tap_timer = null;
+          this.double_tap(e);
+        }
+      }
+      if (this.pressed) this.prevent_default(e);
+      this.pressed = this.dragging = false;
+    },
+    tap: function(e) {
+    },
+    double_tap: function(e) {
+    },
+    move: function(e) {
+      if (!this.interactive()) return;
+      var p = this.position_from_event(e);
+
+      if (this.pressed)  this.dragging = true;
+      if (this.dragging) {
+
+        var distance_x = p.x - this.last_x;
+        var distance_y = p.y - this.last_y;
+
+        var position = this.map.position();
+        position.x -= distance_x;
+        position.y -= distance_y;
+
+        var location = position_to_location(
+          position, this.map.span());
+        this.map.pan(location.latitude, location.longitude);
+        this.prevent_default(e);
+      }
+
+      this.last_x = p.x;
+      this.last_y = p.y;
+    },
+
+    is_map_element: function(element) {
+      while (element != null && element.nodeName != "BODY") {
+        if (element == this.map.element) return true;
+        element = element.offsetParent;
+      }
+      return false;
+    },
+
+    prevent_default: function(e) {
+      if (e.preventDefault) e.preventDefault();
+    },
+
+    position_from_event: function(e) {
+      return {
+        x: e.clientX - this.element.offsetLeft,
+        y: e.clientY - this.element.offsetTop
+      };
+    },
+
+    location_from_event: function(e) {
+      var pos = this.position_from_event(e);
+      var center = this.map.position();
+      pos.x += (center.x - this.map.span() / 2);
+      pos.y += (center.y - this.map.span() / 2);
+      return position_to_location(pos);
+    }
+  });
 
   return Map;
 })();
