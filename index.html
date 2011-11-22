@@ -27,7 +27,7 @@
     name: "App",
     kind: "VFlexBox",
     components: [
-      { name: 'map', kind: 'SlippyMap' },
+      { name: 'map', kind: 'SlippyMap', tracking: true },
       { className: 'controls', components: [
         { name: 'latitude', kind: 'enyo.Input', hint: 'Lat', onchange: 'locationHandler' },
         { name: 'longitude', kind: 'enyo.Input', hint: 'Lng', onchange: 'locationHandler' }

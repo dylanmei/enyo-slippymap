@@ -3,12 +3,14 @@
     name: 'SlippyMap',
     kind: enyo.Control,
     className: 'slippy-map',
+    published: { tracking: false },
     create: function() {
       this.inherited(arguments);
     },
     rendered: function() {
       this.inherited(arguments);
       this.map = new SlippyMap.Map(this.hasNode(), new Mapnik());
+      this.trackingChanged();
     },
     pan: function(latitude, longitude) {
       if (this.map) this.map.pan(latitude, longitude);
@@ -29,7 +31,11 @@
     mark: function(latitude, longitude) {
       if (this.map) this.map.mark(latitude, longitude);
       return this;
-    }
+    },
+
+    trackingChanged: function() {
+      this.map.track(this.tracking);
+    }    
   };
 
   enyo.kind(slippy);

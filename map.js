@@ -9,7 +9,7 @@ SlippyMap.Map = (function() {
       this.overlay = new SlippyMap.Overlay(this),
       this.markers = new SlippyMap.Markers(this)
     ];
-    new EventHandler(this);
+    this.tracker = new EventHandler(this);
   }
 
   _.extend(Map.prototype, {
@@ -56,6 +56,10 @@ SlippyMap.Map = (function() {
 
     span: function() {
       return Math.pow(2, this.depth) * this.service.tile_size();
+    },
+
+    track: function(on) {
+      on ? this.tracker.bind() : this.tracker.unbind();
     },
 
     refresh: function() {
@@ -145,13 +149,41 @@ SlippyMap.Map = (function() {
     this.map = map;
     this.element = map.element;
     this.tap_timer = null;
-    map.element.addEventListener('mousedown', _.bind(this.press, this), false);
-    map.element.addEventListener('mouseup', _.bind(this.release, this), false);
-    map.element.addEventListener('mouseout', _.bind(this.release, this), false);
-    map.element.addEventListener('mousemove', _.bind(this.move, this), false);
   };
 
   _.extend(EventHandler.prototype, {
+    bind: function() {
+      var element = this.element;
+      if (!this.pressHandler) {
+        this.pressHandler = _.bind(this.press, this);
+        element.addEventListener('mousedown', this.pressHandler, false);
+      }
+      if (!this.releaseHandler) {
+        this.releaseHandler = _.bind(this.release, this);
+        element.addEventListener('mouseup', this.releaseHandler, false);
+        element.addEventListener('mouseout', this.releaseHandler, false);
+      }
+      if (!this.moveHandler) {
+        this.moveHandler = _.bind(this.move, this);
+        element.addEventListener('mousemove', this.moveHandler, false);
+      }
+    },
+    unbind: function() {
+      var element = this.element;
+      if (this.pressHandler) {
+        element.removeEventListener('mousedown', this.pressHandler)
+        delete this.pressHandler;          
+      }
+      if (this.releaseHandler) {
+        element.removeEventListener('mouseup', this.pressHandler)
+        element.removeEventListener('mouseout', this.pressHandler)
+        delete this.releaseHandler;
+      }
+      if (this.moveHandler) {
+        element.removeEventListener('mousemove', this.moveHandler)
+        delete this.moveHandler;          
+      }
+    },
     interactive: function() {
       return !_.isUndefined(this.map.ready) && this.map.ready;
     },
