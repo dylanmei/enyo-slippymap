@@ -15,6 +15,8 @@ SlippyMap.Overlay = (function() {
         Math.round((context.width / 2) - context.x) + 'px,' +
         Math.round((context.height / 2) - context.y) + 'px,0)';
       
+      if (this.drawn) return;
+
       var cols = overlay_column_range(context);
       var pos = context.location_to_position(0, 0);
       pos.x -= context.span / 2;
@@ -22,6 +24,8 @@ SlippyMap.Overlay = (function() {
       for (var col = cols.first; col <= cols.last; col++) {
         this.draw_overlay(col, pos, context.span);
       }
+
+      this.drawn = true;
     },
 
     draw_overlay: function(column, position, span) {

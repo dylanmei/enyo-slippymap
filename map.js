@@ -76,30 +76,7 @@ SlippyMap.Map = (function() {
     },
 
     draw: function() {
-      var pos = this.position();
-      var span = this.span();
-      var context = {
-        x: pos.x,
-        y: pos.y,
-        span: span,
-        zoom: this.depth,
-        width: this.width,
-        height: this.height,
-        latitude: this.latitude,
-        longitude: this.longitude,
-
-        location_to_position: function(location) {
-          var args = [].splice.call(arguments, 0);
-          args.push(span);
-          return location_to_position.apply(null, args);
-        },
-
-        position_to_location: function(position) {
-          var args = [].splice.call(arguments, 0);
-          args.push(span);
-          return position_to_location.apply(null, args);
-        }
-      };
+      var context = new DrawContext(this);
 
       _.each(this.layers, function(layer) {
         if (layer.draw) layer.draw(context);
@@ -144,6 +121,33 @@ SlippyMap.Map = (function() {
   function normalize_longitude(longitude) {
     return (longitude + 180) % 360 + (longitude < -180 ? 180 : -180);
   }
+
+  var DrawContext = function(map) {
+    var pos = map.position();
+
+    this.x = pos.x;
+    this.y = pos.y;
+    this.span = map.span();
+    this.zoom = map.depth;
+    this.width = map.width;
+    this.height = map.height;
+    this.latitude = map.latitude;
+    this.longitude = map.longitude;
+  };
+
+  _.extend(DrawContext.prototype, {
+    location_to_position: function(location) {
+      var args = [].splice.call(arguments, 0);
+      args.push(this.span);
+      return location_to_position.apply(null, args);
+    },
+
+    position_to_location: function(position) {
+      var args = [].splice.call(arguments, 0);
+      args.push(this.span);
+      return position_to_location.apply(null, args);
+    }    
+  });
 
   var EventHandler = function(map) {
     this.map = map;
