@@ -27,7 +27,8 @@
     name: "App",
     kind: "VFlexBox",
     components: [
-      { name: 'map', kind: 'SlippyMap', tracking: true },
+      { name: 'map', kind: 'SlippyMap', tracking: true,
+        onPan: 'panHandler', onTap: 'tapHandler', onDoubleTap: 'doubleTapHandler' },
       { className: 'controls', components: [
         { name: 'latitude', kind: 'enyo.Input', hint: 'Lat', onchange: 'locationHandler' },
         { name: 'longitude', kind: 'enyo.Input', hint: 'Lng', onchange: 'locationHandler' }
@@ -35,8 +36,6 @@
     ],
     create: function() {
       this.inherited(arguments);
-      _.observe('map:pan',
-        _.bind(this.panHandler, this));
     },
     rendered: function() {
       this.inherited(arguments);
@@ -54,20 +53,30 @@
         .mark(26.926, 75.8235)
         .mark(47.6, -122.33);
     },
-    panHandler: function(e) {
+    panHandler: function(sender, e) {
       this.$.latitude.setValue(e.latitude.toFixed(4));
       this.$.longitude.setValue(e.longitude.toFixed(4));
     },
+
     locationHandler: function() {
     	this.$.map.pan(
         parseFloat(this.$.latitude.getValue()),
         parseFloat(this.$.longitude.getValue())
     	);
     },
+
     resizeHandler: function() {
       var node = this.hasNode();
       this.$.map.size(node.offsetWidth, node.offsetHeight);
-	  }		
+	  },
+
+    tapHandler: function(sender, e) {
+      console.log('tap', e.location);
+    },
+
+    doubleTapHandler: function(sender, e) {
+      console.log('double-tap', e.location);
+    }
 	});
 })();
 

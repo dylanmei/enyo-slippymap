@@ -159,11 +159,11 @@ SlippyMap.Map = (function() {
     bind: function() {
       var element = this.element;
       if (!this.pressHandler) {
-        this.pressHandler = _.bind(this.press, this);
+        this.pressHandler = _.throttle(_.bind(this.press, this), 100);
         element.addEventListener('mousedown', this.pressHandler, false);
       }
       if (!this.releaseHandler) {
-        this.releaseHandler = _.bind(this.release, this);
+        this.releaseHandler = _.throttle(_.bind(this.release, this), 100);
         element.addEventListener('mouseup', this.releaseHandler, false);
         element.addEventListener('mouseout', this.releaseHandler, false);
       }
@@ -208,13 +208,12 @@ SlippyMap.Map = (function() {
 
       if (!this.dragging && this.pressed) {
         if (!this.tap_timer) {
-          this.tap_timer = window.setTimeout(_.bind(function(e) {
-            this.tap(e); this.tap_timer = null;
+          this.tap_timer = setTimeout(_.bind(function(e) {
+            this.tap(e);
           }, this, e), 360);
         }
         else {
-          window.clearTimeout(this.tap_timer);
-          this.tap_timer = null;
+          clearTimeout(this.tap_timer);
           this.double_tap(e);
         }
       }
@@ -222,8 +221,18 @@ SlippyMap.Map = (function() {
       this.pressed = this.dragging = false;
     },
     tap: function(e) {
+      delete this.tap_timer;
+      _.trigger('map:tap', {
+        position: this.position_from_event(e),
+        location: this.location_from_event(e)
+      });
     },
     double_tap: function(e) {
+      delete this.tap_timer;
+      _.trigger('map:doubleTap', {
+        position: this.position_from_event(e),
+        location: this.location_from_event(e)
+      });
     },
     move: function(e) {
       if (!this.interactive()) return;
@@ -262,6 +271,14 @@ SlippyMap.Map = (function() {
     },
 
     position_from_event: function(e) {
+      if (this.element.getBoundingClientRect) {
+        var box = this.element.getBoundingClientRect();
+        return {
+          x: e.clientX - box.left,
+          y: e.clientY - box.top
+        };
+      }
+
       return {
         x: e.clientX - this.element.offsetLeft,
         y: e.clientY - this.element.offsetTop
@@ -271,9 +288,9 @@ SlippyMap.Map = (function() {
     location_from_event: function(e) {
       var pos = this.position_from_event(e);
       var center = this.map.position();
-      pos.x += (center.x - this.map.span() / 2);
-      pos.y += (center.y - this.map.span() / 2);
-      return position_to_location(pos);
+      pos.x += (center.x - this.map.width / 2);
+      pos.y += (center.y - this.map.height / 2);
+      return position_to_location(pos, this.map.span());
     }
   });
 
